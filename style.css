@@ -1,0 +1,9 @@
+body{
+    margin: 0;
+    background-color: beige;
+    overflow: hidden;
+    text-align: center;
+}
+#my-canvas{
+    background-color: lightgray;
+}
