@@ -30,6 +30,27 @@ class NeuralNetwork {
       }
     });
   }
+
+  static crossbreeding(networkA, networkB, amount = 0.5) {
+    for (let i = 0; i < networkA.levels.length; i++) {
+      for (let j = 0; j < networkA.levels[i].biases.length; j++) {
+        networkA.levels[i].biases[j] = lerp(
+          networkA.levels[i].biases[j],
+          networkB.levels[i].biases[j],
+          amount
+        );
+      }
+      for (let j = 0; j < networkA.levels[i].weights.length; j++) {
+        for (let k = 0; k < networkA.levels[i].weights[j].length; k++) {
+          networkA.levels[i].weights[j][k] = lerp(
+            networkA.levels[i].weights[j][k],
+            networkB.levels[i].weights[j][k],
+            amount
+          );
+        }
+      }
+    }
+  }
 }
 
 class Level {

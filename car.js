@@ -24,28 +24,26 @@ class Car {
   }
 
   update(roadBorders, traffic, bestCar) {
-    if (this.controlType != "DUMMY" && this.y - 180 > bestCar.y) {
+    if (this.controlType != "DUMMY" && this.y - 230 > bestCar.y) {
       this.damaged = true;
     }
     if (!this.damaged) {
       this.#move();
       this.polygon = this.#createPolygon();
-      if (this.controlType != "DUMMY") {
-        this.damaged = this.#assessDamage(roadBorders, traffic, bestCar);
-      }
-    }
-    if (this.sensor) {
-      this.sensor.update(roadBorders, traffic);
-      const offsets = this.sensor.readings.map((s) =>
-        s == null ? 0 : 1 - s.offset
-      );
-      const outputs = NeuralNetwork.feedForward(offsets, this.brain);
+      this.damaged = this.#assessDamage(roadBorders, traffic, bestCar);
+      if (this.sensor) {
+        this.sensor.update(roadBorders, traffic);
+        const offsets = this.sensor.readings.map((s) =>
+          s == null ? 0 : 1 - s.offset
+        );
+        const outputs = NeuralNetwork.feedForward(offsets, this.brain);
 
-      if (this.useBrain) {
-        this.controls.forward = outputs[0];
-        this.controls.left = outputs[1];
-        this.controls.right = outputs[2];
-        this.controls.reverse = outputs[3];
+        if (this.useBrain) {
+          this.controls.forward = outputs[0];
+          this.controls.left = outputs[1];
+          this.controls.right = outputs[2];
+          this.controls.reverse = outputs[3];
+        }
       }
     }
   }
@@ -58,7 +56,6 @@ class Car {
     }
     for (let i = 0; i < traffic.length; i++) {
       if (polysIntersect(this.polygon, traffic[i].polygon)) {
-        top5.checkTop5(-this.y, this.brain);
         return true;
       }
     }

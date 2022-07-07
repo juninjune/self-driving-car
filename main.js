@@ -8,31 +8,43 @@ const networkCtx = networkCanvas.getContext("2d");
 const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, 3);
 
 const traffic = [
-  new Car(road.getLaneCenter(road.getRandomLane()), -150, 30, 50, "DUMMY", 2),
+  new Car(road.getLaneCenter(road.getRandomLane()), 0, 30, 50, "DUMMY", 0.8),
+  new Car(road.getLaneCenter(road.getRandomLane()), -150, 30, 50, "DUMMY", 0.9),
+  new Car(road.getLaneCenter(road.getRandomLane()), -300, 30, 50, "DUMMY", 1.1),
+  new Car(road.getLaneCenter(road.getRandomLane()), -450, 30, 50, "DUMMY", 1),
+  new Car(road.getLaneCenter(road.getRandomLane()), -600, 30, 50, "DUMMY", 1.3),
+  new Car(road.getLaneCenter(road.getRandomLane()), -750, 30, 50, "DUMMY", 1.6),
+  new Car(road.getLaneCenter(road.getRandomLane()), -900, 30, 50, "DUMMY", 1.4),
+  new Car(
+    road.getLaneCenter(road.getRandomLane()),
+    -1050,
+    30,
+    50,
+    "DUMMY",
+    1.7
+  ),
 ];
 const genTrafficTerm = 4;
 let genTrafficTime = genTrafficTerm;
 
 const N = 500;
 const cars = generateCars(N);
-
-const top5 = new Top5();
+let aliveCarCount = 0;
+const aliveCarText = document.getElementById("alive-cars");
 
 let bestCar = cars[0];
 if (localStorage.getItem("bestBrain")) {
   for (let i = 0; i < cars.length; i++) {
     cars[i].brain = JSON.parse(localStorage.getItem("bestBrain"));
-    if (i != 0) {
-      if (Math.random() < 0.05) {
-        NeuralNetwork.mutate(cars[i].brain, 0.25);
-      } else {
-        NeuralNetwork.mutate(cars[i].brain, 0.1);
-      }
+  }
+  for (let i = 1; i < cars.length; i++) {
+    if (Math.random() < 0.03) {
+      NeuralNetwork.mutate(cars[i].brain, 0.15);
+    } else {
+      NeuralNetwork.mutate(cars[i].brain, 0.05);
     }
   }
 }
-
-const top5Brains = [];
 
 let bestScore =
   localStorage.getItem("bestScore") == null
@@ -46,6 +58,8 @@ const currentScoreText = document.getElementById("current-score");
 
 let isTrainMode = JSON.parse(localStorage.getItem("isTraining"));
 const trainingTime = 100;
+
+let isReloaing = false;
 
 animate();
 
@@ -86,34 +100,46 @@ function generateDummy() {
   traffic.push(
     new Car(
       road.getLaneCenter(randomLane),
-      bestCar.y - 400,
+      bestCar.y - Math.random() * 200 - 800,
       30,
       50,
       "DUMMY",
       Math.random() + 0.7
     ),
     new Car(
-      road.getLaneCenter((randomLane + 1) % road.laneCount),
-      bestCar.y - 400,
+      road.getLaneCenter((randomLane + 2) % road.laneCount),
+      bestCar.y - Math.random() * 200 - 800,
       30,
       50,
       "DUMMY",
       Math.random() + 0.7
     )
+    //new Car(
+    //  road.getLaneCenter((randomLane + 4) % road.laneCount),
+    //  bestCar.y - Math.random() * 200 - 800,
+    //  30,
+    //  50,
+    //  "DUMMY",
+    //  Math.random() + 0.7
+    //)
   );
 }
 
 function animate(time) {
   let isAnyCarAlive = false;
+  aliveCarCount = 0;
   for (i = 0; i < cars.length; i++) {
     if (cars[i].damaged == false) {
       isAnyCarAlive = true;
+      aliveCarCount++;
     }
   }
-  if (!isAnyCarAlive) {
-    if (bestScore > pastBestScore) {
+  aliveCarText.innerText = aliveCarCount;
+  if (!isAnyCarAlive && !isReloaing) {
+    if (-bestCar.y > 3000) {
       save();
     }
+    isReloaing = true;
     location.reload();
   }
 

@@ -3,32 +3,35 @@ class Top5 {
     this.scoreboard =
       localStorage.getItem("top5Brain") == null
         ? []
-        : localStorage.getItem("top5Brain");
+        : JSON.parse(localStorage.getItem("top5Brain"));
+
+    console.table(this.scoreboard);
   }
 
   checkTop5(score, brain) {
-    console.log(this.scoreboard.length);
     const record = new Record(score, brain);
     if (this.scoreboard.length < 5) {
       this.scoreboard.push(record);
       this.scoreboard = this.sort(this.scoreboard);
-      localStorage.setItem("top5Brain", this.scoreboard);
+      localStorage.setItem("top5Brain", JSON.stringify(this.scoreboard));
     } else if (record.score > this.scoreboard[4].score) {
-      scoreboard[4] = record;
-      scoreboard = sort(scoreboard);
-      localStorage.setItem("top5Brain", scoreboard);
+      this.scoreboard.pop();
+      this.scoreboard.push(record);
+      this.scoreboard = this.sort(this.scoreboard);
+      localStorage.setItem("top5Brain", JSON.stringify(this.scoreboard));
     }
   }
 
   sort(scoreboard) {
     const length = scoreboard.length;
+
     if (length == 1) {
       return scoreboard;
     }
     for (i = 1; i < length; i++) {
       if (
         this.scoreboard[length - i].score <=
-        this.scoreboard[length - (i + i)].score
+        this.scoreboard[length - (i + 1)].score
       ) {
         return scoreboard;
       } else {
@@ -37,6 +40,7 @@ class Top5 {
         this.scoreboard[length - i] = tmpRecord;
       }
     }
+
     return scoreboard;
   }
 }

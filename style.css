@@ -24,6 +24,11 @@ body {
   margin-bottom: 10px;
 }
 
+#alive-cars {
+  display: block;
+  margin-bottom: 10px;
+}
+
 button {
   border: none;
   border-radius: 5px;
