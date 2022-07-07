@@ -30,6 +30,10 @@ class Road {
     );
   }
 
+  getRandomLane() {
+    return Math.floor(Math.random() * this.laneCount);
+  }
+
   draw(ctx) {
     ctx.lineWidth = 5;
     ctx.strokeStyle = "white";

@@ -8,8 +8,20 @@ body {
 }
 
 #verticalButtons {
+  margin: 0px 5px;
   display: flex;
   flex-direction: column;
+  text-align: center;
+}
+
+#best-score {
+  display: block;
+  margin-bottom: 10px;
+}
+
+#current-score {
+  display: block;
+  margin-bottom: 10px;
 }
 
 button {

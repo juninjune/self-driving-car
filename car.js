@@ -24,13 +24,15 @@ class Car {
   }
 
   update(roadBorders, traffic, bestCar) {
-    if (this.controlType != "DUMMY" && this.y - 220 > bestCar.y) {
+    if (this.controlType != "DUMMY" && this.y - 180 > bestCar.y) {
       this.damaged = true;
     }
     if (!this.damaged) {
       this.#move();
       this.polygon = this.#createPolygon();
-      this.damaged = this.#assessDamage(roadBorders, traffic, bestCar);
+      if (this.controlType != "DUMMY") {
+        this.damaged = this.#assessDamage(roadBorders, traffic, bestCar);
+      }
     }
     if (this.sensor) {
       this.sensor.update(roadBorders, traffic);
@@ -56,6 +58,7 @@ class Car {
     }
     for (let i = 0; i < traffic.length; i++) {
       if (polysIntersect(this.polygon, traffic[i].polygon)) {
+        top5.checkTop5(-this.y, this.brain);
         return true;
       }
     }

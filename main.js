@@ -5,30 +5,26 @@ networkCanvas.width = 400;
 
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
-const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9);
+const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, 3);
 
 const traffic = [
-  new Car(
-    road.getLaneCenter(Math.floor(Math.random() * road.laneCount)),
-    -150,
-    30,
-    50,
-    "DUMMY",
-    2
-  ),
+  new Car(road.getLaneCenter(road.getRandomLane()), -150, 30, 50, "DUMMY", 2),
 ];
-const genTrafficTerm = 5;
+const genTrafficTerm = 4;
 let genTrafficTime = genTrafficTerm;
 
-const N = 100;
+const N = 500;
 const cars = generateCars(N);
+
+const top5 = new Top5();
+
 let bestCar = cars[0];
 if (localStorage.getItem("bestBrain")) {
   for (let i = 0; i < cars.length; i++) {
     cars[i].brain = JSON.parse(localStorage.getItem("bestBrain"));
     if (i != 0) {
       if (Math.random() < 0.05) {
-        NeuralNetwork.mutate(cars[i].brain, 0.5);
+        NeuralNetwork.mutate(cars[i].brain, 0.25);
       } else {
         NeuralNetwork.mutate(cars[i].brain, 0.1);
       }
@@ -36,10 +32,28 @@ if (localStorage.getItem("bestBrain")) {
   }
 }
 
+const top5Brains = [];
+
+let bestScore =
+  localStorage.getItem("bestScore") == null
+    ? 0
+    : localStorage.getItem("bestScore");
+const pastBestScore = bestScore;
+const bestScoreText = document.getElementById("best-score");
+
+let currentScore = 0;
+const currentScoreText = document.getElementById("current-score");
+
 let isTrainMode = JSON.parse(localStorage.getItem("isTraining"));
-const trainingTime = 30;
+const trainingTime = 100;
 
 animate();
+
+function clearBestScore() {
+  localStorage.setItem("bestScore", 0);
+  localStorage.removeItem("top5Brain");
+  bestScore = 0;
+}
 
 function save() {
   localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
@@ -67,7 +81,7 @@ function generateCars(N) {
   return cars;
 }
 
-function generateDummy(distance) {
+function generateDummy() {
   const randomLane = Math.floor(Math.random() * road.laneCount);
   traffic.push(
     new Car(
@@ -76,7 +90,7 @@ function generateDummy(distance) {
       30,
       50,
       "DUMMY",
-      Math.random() + 1
+      Math.random() + 0.7
     ),
     new Car(
       road.getLaneCenter((randomLane + 1) % road.laneCount),
@@ -84,7 +98,7 @@ function generateDummy(distance) {
       30,
       50,
       "DUMMY",
-      Math.random() + 1
+      Math.random() + 0.7
     )
   );
 }
@@ -97,7 +111,9 @@ function animate(time) {
     }
   }
   if (!isAnyCarAlive) {
-    save();
+    if (bestScore > pastBestScore) {
+      save();
+    }
     location.reload();
   }
 
@@ -105,10 +121,10 @@ function animate(time) {
     generateDummy();
     genTrafficTime += genTrafficTerm;
   }
-  if (time / 1000 > trainingTime && isTrainMode) {
-    save();
-    location.reload();
-  }
+
+  //if (time / 1000 > trainingTime && isTrainMode) {
+  //  location.reload();
+  //}
 
   for (let i = 0; i < traffic.length; i++) {
     traffic[i].update(road.borders, []);
@@ -136,6 +152,15 @@ function animate(time) {
   bestCar.draw(carCtx, "blue", true);
 
   carCtx.restore();
+
+  if (-bestCar.y > bestScore) {
+    bestScore = -bestCar.y;
+    localStorage.setItem("bestScore", -bestCar.y);
+  }
+  bestScoreText.innerText = Math.floor(bestScore);
+
+  currentScoreText.innerText =
+    Math.floor(-bestCar.y) > 0 ? Math.floor(-bestCar.y) : 0;
 
   networkCtx.lineDashOffset = -time / 60;
   Visualizer.drawNetwork(networkCtx, bestCar.brain);
