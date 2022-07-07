@@ -29,8 +29,8 @@ class Sensor {
 
       const start = { x: this.car.x, y: this.car.y };
       const end = {
-        x: this.car.x - Math.tan(rayAngle) * this.rayLength,
-        y: this.car.y - this.rayLength,
+        x: this.car.x - Math.sin(rayAngle) * this.rayLength,
+        y: this.car.y - Math.cos(rayAngle) * this.rayLength,
       };
       this.rays.push([start, end]);
     }
