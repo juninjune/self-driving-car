@@ -46,3 +46,15 @@ function getRGBA(value) {
   const B = value > 0 ? 0 : 150;
   return "rgba(" + R + "," + G + "," + B + "," + alpha + ")";
 }
+
+function gaussianRand() {
+  let rand = 0;
+  for (let i = 0; i < 6; i += 1) {
+    rand += Math.random();
+  }
+  return rand / 6;
+}
+
+function gaussianRandom(start, end) {
+  return Math.floor(start + gaussianRand() * (end - start + 1));
+}

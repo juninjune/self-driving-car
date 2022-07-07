@@ -1,8 +1,9 @@
-const trafficSpeed = 0.5;
-const genTrafficTerm = 4000; //frame
+const trafficSpeed = 1;
+const genTrafficTerm = 4000;
 const mutateFrequency = 0.05;
 const mutateHigh = 0.5;
 const mutateLow = 0.1;
+const carQuantity = 500;
 
 //이미지 그릴 캔버스 준비
 //carCanvas : 도로와 차
@@ -26,8 +27,7 @@ const scoreboard = new Scoreboard();
 const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, 3);
 
 // ai 자동차 생성
-const N = 500;
-const cars = generateCars(N);
+const cars = generateCars(carQuantity);
 
 // ai brain 설정
 let bestCar = cars[0];
@@ -65,7 +65,7 @@ function MakeTraffic(distance, distanceTerm, count) {
         30,
         50,
         "DUMMY",
-        Math.random() + trafficSpeed
+        gaussianRand() - 0.5 + trafficSpeed
       )
     );
   }
@@ -151,7 +151,7 @@ function animate(time) {
   }
   carCtx.globalAlpha = 0.5;
   cars[0].draw(carCtx, "red", false);
-  carCtx.globalAlpha = 1;
+  carCtx.globalAlpha = 0.9;
   bestCar.draw(carCtx, color.aiCarColor, true);
 
   carCtx.restore();
