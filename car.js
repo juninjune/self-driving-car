@@ -22,15 +22,12 @@ class Car {
     }
   }
 
-  update(roadBorders, traffic, bestCar = null) {
-    switch (this.controlType) {
-      case "DUMMY":
-        break;
-      case "AI":
-        break;
-    }
-
-    if (this.controlType != "DUMMY" && this.y - 230 > bestCar.y) {
+  update(roadBorders, traffic, bestCar = null, container = null) {
+    if (
+      this.controlType != "DUMMY" &&
+      this.controlType != "START" &&
+      this.y - bestCar.y > 230
+    ) {
       this.damaged = true;
     }
     if (!this.damaged) {
@@ -49,6 +46,15 @@ class Car {
           this.controls.left = outputs[1];
           this.controls.right = outputs[2];
           this.controls.reverse = outputs[3];
+        }
+      }
+    }
+    if (this.controlType == "DUMMY") {
+      if (this.y - bestCar.y > 280) {
+        for (let i = 0; i < container.length; i++) {
+          if (container[i].y == this.y) {
+            container.splice(i, 1);
+          }
         }
       }
     }

@@ -11,6 +11,8 @@ class Controls {
         break;
       case "DUMMY":
         this.forward = true;
+      case "START":
+        this.forward = true;
         break;
     }
   }

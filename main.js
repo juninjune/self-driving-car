@@ -1,9 +1,10 @@
-const trafficSpeed = 1;
-const genTrafficTerm = 4000;
+const trafficSpeed = 1.5;
+const trafficQuantity = 4;
+
+const carQuantity = 500;
 const mutateFrequency = 0.05;
 const mutateHigh = 0.5;
 const mutateLow = 0.1;
-const carQuantity = 500;
 
 //이미지 그릴 캔버스 준비
 //carCanvas : 도로와 차
@@ -49,11 +50,11 @@ if (localStorage.getItem("bestBrain")) {
 
 //초기 traffic 생성
 const traffic = [
-  new Car(road.getLaneCenter(0), 250, 30, 50, "DUMMY", 2),
-  new Car(road.getLaneCenter(1), 250, 30, 50, "DUMMY", 2),
-  new Car(road.getLaneCenter(2), 250, 30, 50, "DUMMY", 2),
+  new Car(road.getLaneCenter(0), 250, 30, 50, "START", 2),
+  new Car(road.getLaneCenter(1), 250, 30, 50, "START", 2),
+  new Car(road.getLaneCenter(2), 250, 30, 50, "START", 2),
 ];
-traffic.push(...MakeTraffic(350, 150, 3));
+traffic.push(...MakeTraffic(100, 150, 3));
 
 function MakeTraffic(distance, distanceTerm, count) {
   const newTraffic = [];
@@ -71,11 +72,6 @@ function MakeTraffic(distance, distanceTerm, count) {
   }
   return newTraffic;
 }
-
-// 매 genTrafficTerm마다 traffic 생성
-let genTrafficTime = genTrafficTerm;
-
-animate();
 
 function saveBrain() {
   localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
@@ -102,11 +98,11 @@ function getAliveCarCount() {
   return aliveCarCount;
 }
 
+animate();
+
 function animate(time) {
   const score = -bestCar.y;
-  if (score > scoreboard.bestScore) {
-    scoreboard.updateBestScore(score);
-  }
+
   scoreboard.updateScore(score);
 
   const aliveCarCount = getAliveCarCount();
@@ -122,13 +118,13 @@ function animate(time) {
     location.reload();
   }
 
-  if (time > genTrafficTime) {
-    traffic.push(...MakeTraffic(400, 100, 2));
-    genTrafficTime += genTrafficTerm;
+  if (traffic.length - 3 < trafficQuantity) {
+    // ㅇㅣㄱㅓ ㄲㅗㄱ ㄱㅗㅊㅕㅇㅑㅎㅐㅇㅛ. out START value
+    traffic.push(...MakeTraffic(750, 0, 1));
   }
 
   for (let i = 0; i < traffic.length; i++) {
-    traffic[i].update(road.borders, []);
+    traffic[i].update(road.borders, [], bestCar, traffic);
   }
   for (let i = 0; i < cars.length; i++) {
     cars[i].update(road.borders, traffic, bestCar);
@@ -155,6 +151,10 @@ function animate(time) {
   bestCar.draw(carCtx, color.aiCarColor, true);
 
   carCtx.restore();
+
+  if (score > scoreboard.bestScore) {
+    scoreboard.updateBestScore(score);
+  }
 
   networkCtx.lineDashOffset = -time / 60;
   Visualizer.drawNetwork(networkCtx, bestCar.brain);
