@@ -45,6 +45,8 @@ if (localStorage.getItem("bestBrain")) {
   }
 }
 
+// car 객체의 update 가 정리가 좀 필요합니다.
+
 //초기 traffic 생성
 const traffic = [
   new Car(road.getLaneCenter(0), 250, 30, 50, "DUMMY", 2),
