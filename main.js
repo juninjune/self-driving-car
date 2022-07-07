@@ -94,28 +94,6 @@ function generateCars(N) {
   return cars;
 }
 
-function generateDummy() {
-  const randomLane = Math.floor(Math.random() * road.laneCount);
-  traffic.push(
-    new Car(
-      road.getLaneCenter(randomLane),
-      bestCar.y - Math.random() * 200 - 800,
-      30,
-      50,
-      "DUMMY",
-      Math.random() + 0.5
-    ),
-    new Car(
-      road.getLaneCenter((randomLane + 4) % road.laneCount),
-      bestCar.y - Math.random() * 200 - 800,
-      30,
-      50,
-      "DUMMY",
-      Math.random() + 0.7
-    )
-  );
-}
-
 function getAliveCarCount() {
   let aliveCarCount = 0;
   for (i = 0; i < cars.length; i++) {
@@ -126,6 +104,8 @@ function getAliveCarCount() {
 
 function animate(time) {
   const score = -bestCar.y;
+  scoreboard.updateScore(score);
+
   const aliveCarCount = getAliveCarCount();
   scoreboard.updateAliveCars(aliveCarCount);
 
@@ -141,7 +121,6 @@ function animate(time) {
 
   if (time > genTrafficTime) {
     traffic.push(...MakeTraffic(400, 100, 2));
-    generateDummy();
     genTrafficTime += genTrafficTerm;
   }
 
@@ -175,8 +154,6 @@ function animate(time) {
   if (score > scoreboard.bestScore) {
     scoreboard.updateBestScore(score);
   }
-
-  scoreboard.updateScore(score);
 
   networkCtx.lineDashOffset = -time / 60;
   Visualizer.drawNetwork(networkCtx, bestCar.brain);
