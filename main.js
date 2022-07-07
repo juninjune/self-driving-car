@@ -1,14 +1,16 @@
-const trafficSpeed = 1.5;
-const trafficQuantity = 4;
-
+//AI Settings
 const carQuantity = 500;
-const mutateFrequency = 0.05;
-const mutateHigh = 0.5;
+const mutateFrequency = 0.075;
+const mutateHigh = 0.4;
 const mutateLow = 0.1;
 
-//이미지 그릴 캔버스 준비
+//Traffic(obstacles) Settings
+const trafficSpeed = 1.5;
+const trafficQuantity = 5;
+
+//이미지 캔버스 준비
 //carCanvas : 도로와 차
-//networkCanvas : 신경망 시각화
+//networkCanvas : 신경망
 const carCanvas = document.getElementById("carCanvas");
 carCanvas.width = 200;
 const networkCanvas = document.getElementById("networkCanvas");
@@ -32,31 +34,32 @@ const cars = generateCars(carQuantity);
 
 // ai brain 설정
 let bestCar = cars[0];
-//로컬저장소에 bestBrain이 저장되어있으면 모든 차에 부여. 아니면 랜덤으로 설정되어있음.
-if (localStorage.getItem("bestBrain")) {
-  for (let i = 0; i < cars.length; i++) {
-    cars[i].brain = JSON.parse(localStorage.getItem("bestBrain"));
-    if (i != 0) {
-      if (Math.random() < mutateFrequency) {
-        NeuralNetwork.mutate(cars[i].brain, mutateHigh); // 변종 출현
-      } else {
-        NeuralNetwork.mutate(cars[i].brain, mutateLow); // 약간 변화함
+setBrain(cars);
+
+//초기 traffic 생성
+const traffic = [
+  new Car(road.getLaneCenter(0), 250, 30, 50, "START", 2.5),
+  new Car(road.getLaneCenter(1), 250, 30, 50, "START", 2.5),
+  new Car(road.getLaneCenter(2), 250, 30, 50, "START", 2.5),
+];
+traffic.push(...makeTraffic(180, 150, 5));
+
+function setBrain(cars) {
+  if (localStorage.getItem("bestBrain")) {
+    for (let i = 0; i < cars.length; i++) {
+      cars[i].brain = JSON.parse(localStorage.getItem("bestBrain"));
+      if (i != 0) {
+        if (Math.random() < mutateFrequency) {
+          NeuralNetwork.mutate(cars[i].brain, mutateHigh); // 변종 출현
+        } else {
+          NeuralNetwork.mutate(cars[i].brain, mutateLow); // 약간 변화함
+        }
       }
     }
   }
 }
 
-// car 객체의 update 가 정리가 좀 필요합니다.
-
-//초기 traffic 생성
-const traffic = [
-  new Car(road.getLaneCenter(0), 250, 30, 50, "START", 2),
-  new Car(road.getLaneCenter(1), 250, 30, 50, "START", 2),
-  new Car(road.getLaneCenter(2), 250, 30, 50, "START", 2),
-];
-traffic.push(...MakeTraffic(100, 150, 3));
-
-function MakeTraffic(distance, distanceTerm, count) {
+function makeTraffic(distance, distanceTerm, count) {
   const newTraffic = [];
   for (let i = 0; i < count; i++) {
     newTraffic.push(
@@ -120,7 +123,7 @@ function animate(time) {
 
   if (traffic.length - 3 < trafficQuantity) {
     // ㅇㅣㄱㅓ ㄲㅗㄱ ㄱㅗㅊㅕㅇㅑㅎㅐㅇㅛ. out START value
-    traffic.push(...MakeTraffic(750, 0, 1));
+    traffic.push(...makeTraffic(750, 0, 1));
   }
 
   for (let i = 0; i < traffic.length; i++) {
