@@ -17,6 +17,25 @@ class Sensor {
     }
   }
 
+  #castRays() {
+    this.rays = [];
+    for (let i = 0; i < this.rayCount; i++) {
+      const rayAngle =
+        lerp(
+          this.raySpread / 2,
+          -this.raySpread / 2,
+          this.rayCount == 1 ? 0.5 : i / (this.rayCount - 1)
+        ) + this.car.angle;
+
+      const start = { x: this.car.x, y: this.car.y };
+      const end = {
+        x: this.car.x - Math.tan(rayAngle) * this.rayLength,
+        y: this.car.y - this.rayLength,
+      };
+      this.rays.push([start, end]);
+    }
+  }
+
   #getReading(ray, roadBorders, traffic) {
     let touches = [];
 
@@ -53,25 +72,6 @@ class Sensor {
       const offsets = touches.map((e) => e.offset);
       const minOffset = Math.min(...offsets);
       return touches.find((e) => e.offset == minOffset);
-    }
-  }
-
-  #castRays() {
-    this.rays = [];
-    for (let i = 0; i < this.rayCount; i++) {
-      const rayAngle =
-        lerp(
-          this.raySpread / 2,
-          -this.raySpread / 2,
-          this.rayCount == 1 ? 0.5 : i / (this.rayCount - 1)
-        ) + this.car.angle;
-
-      const start = { x: this.car.x, y: this.car.y };
-      const end = {
-        x: this.car.x - Math.tan(rayAngle) * this.rayLength,
-        y: this.car.y - this.rayLength,
-      };
-      this.rays.push([start, end]);
     }
   }
 
