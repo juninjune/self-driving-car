@@ -7,28 +7,23 @@
   <body>
     <canvas id="carCanvas"></canvas>
     <div id="verticalButtons">
-      <span>Best Score</span>
-      <span id="best-score">0</span>
-      <span>Last 5 average</span>
-      <span id="last-5-average">0</span>
-      <span>Score</span>
-      <span id="current-score">0</span>
-      <span>Alive cars</span>
-      <span id="alive-cars">0</span>
-      <button onclick="save()">💾</button>
-      <span>save brain</span>
-      <button onclick="discard()">🗑️</button>
-      <span>discard brain</span>
-      <button onclick="clearBestScore()">🗑️</button>
-      <span>discard best score</span>
-      <button onclick="activeTrain()">🏃‍♀️</button>
-      <span>training mode</span>
-      <button onclick="deactiveTrain()">🧎</button>
-      <span>rest mode</span>
+      <span class="text-holder">Best Score</span>
+      <span class="count-box" id="best-score">0</span>
+      <span class="text-holder">Try</span>
+      <span class="count-box" id="try-count">0</span>
+      <span class="text-holder">Last 5 average</span>
+      <span class="count-box" id="last-five-score">0</span>
+      <span class="text-holder">Score</span>
+      <span class="count-box" id="current-score">0</span>
+      <span class="text-holder">Alive cars</span>
+      <span class="count-box" id="alive-cars">0</span>
+      <button onclick="resetDatas()">🗑️</button>
+      <span>Reset datas</span>
     </div>
     <canvas id="networkCanvas"></canvas>
+    <script src="Color.js"></script>
     <script src="utils.js"></script>
-    <script src="top5.js"></script>
+    <script src="scoreboard.js"></script>
     <script src="visualizer.js"></script>
     <script src="network.js"></script>
     <script src="sensor.js"></script>

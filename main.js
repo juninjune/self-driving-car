@@ -1,90 +1,87 @@
+const trafficSpeed = 0.5;
+const genTrafficTerm = 4000; //frame
+const mutateFrequency = 0.05;
+const mutateHigh = 0.5;
+const mutateLow = 0.1;
+
+//이미지 그릴 캔버스 준비
+//carCanvas : 도로와 차
+//networkCanvas : 신경망 시각화
 const carCanvas = document.getElementById("carCanvas");
 carCanvas.width = 200;
 const networkCanvas = document.getElementById("networkCanvas");
 networkCanvas.width = 400;
 
+//캔버스에서 사용할 컬러 팔레트
+const color = new Color();
+
+//각 캔버스 컨텍스트
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
+
+// 점수판 초기화
+const scoreboard = new Scoreboard();
+
+//도로 초기화 (위치, 너비, 래인수)
 const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, 3);
 
-const traffic = [
-  new Car(road.getLaneCenter(road.getRandomLane()), 0, 30, 50, "DUMMY", 0.8),
-  new Car(road.getLaneCenter(road.getRandomLane()), -150, 30, 50, "DUMMY", 0.9),
-  new Car(road.getLaneCenter(road.getRandomLane()), -300, 30, 50, "DUMMY", 1.1),
-  new Car(road.getLaneCenter(road.getRandomLane()), -450, 30, 50, "DUMMY", 1),
-  new Car(road.getLaneCenter(road.getRandomLane()), -600, 30, 50, "DUMMY", 1.3),
-  new Car(road.getLaneCenter(road.getRandomLane()), -750, 30, 50, "DUMMY", 1.6),
-  new Car(road.getLaneCenter(road.getRandomLane()), -900, 30, 50, "DUMMY", 1.4),
-  new Car(
-    road.getLaneCenter(road.getRandomLane()),
-    -1050,
-    30,
-    50,
-    "DUMMY",
-    1.7
-  ),
-];
-const genTrafficTerm = 4;
-let genTrafficTime = genTrafficTerm;
-
+// ai 자동차 생성
 const N = 500;
 const cars = generateCars(N);
-let aliveCarCount = 0;
-const aliveCarText = document.getElementById("alive-cars");
 
+// ai brain 설정
 let bestCar = cars[0];
+//로컬저장소에 bestBrain이 저장되어있으면 모든 차에 부여. 아니면 랜덤으로 설정되어있음.
 if (localStorage.getItem("bestBrain")) {
   for (let i = 0; i < cars.length; i++) {
     cars[i].brain = JSON.parse(localStorage.getItem("bestBrain"));
-  }
-  for (let i = 1; i < cars.length; i++) {
-    if (Math.random() < 0.03) {
-      NeuralNetwork.mutate(cars[i].brain, 0.15);
-    } else {
-      NeuralNetwork.mutate(cars[i].brain, 0.05);
+    if (i != 0) {
+      if (Math.random() < mutateFrequency) {
+        NeuralNetwork.mutate(cars[i].brain, mutateHigh); // 변종 출현
+      } else {
+        NeuralNetwork.mutate(cars[i].brain, mutateLow); // 약간 변화함
+      }
     }
   }
 }
 
-let bestScore =
-  localStorage.getItem("bestScore") == null
-    ? 0
-    : localStorage.getItem("bestScore");
-const pastBestScore = bestScore;
-const bestScoreText = document.getElementById("best-score");
+//초기 traffic 생성
+const traffic = [
+  new Car(road.getLaneCenter(0), 250, 30, 50, "DUMMY", 2),
+  new Car(road.getLaneCenter(1), 250, 30, 50, "DUMMY", 2),
+  new Car(road.getLaneCenter(2), 250, 30, 50, "DUMMY", 2),
+];
+traffic.push(...MakeTraffic(400, 0, 3));
 
-let currentScore = 0;
-const currentScoreText = document.getElementById("current-score");
+function MakeTraffic(distance, distanceTerm, count) {
+  const newTraffic = [];
+  for (let i = 0; i < count; i++) {
+    newTraffic.push(
+      new Car(
+        road.getLaneCenter(road.getRandomLane()),
+        bestCar.y - distance - distanceTerm * i,
+        30,
+        50,
+        "DUMMY",
+        Math.random() + trafficSpeed
+      )
+    );
+  }
+  return newTraffic;
+}
 
-let isTrainMode = JSON.parse(localStorage.getItem("isTraining"));
-const trainingTime = 100;
-
-let isReloaing = false;
+// 매 genTrafficTerm마다 traffic 생성
+let genTrafficTime = genTrafficTerm;
 
 animate();
 
-function clearBestScore() {
-  localStorage.setItem("bestScore", 0);
-  localStorage.removeItem("top5Brain");
-  bestScore = 0;
-}
-
-function save() {
+function saveBrain() {
   localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
 }
 
-function discard() {
-  localStorage.removeItem("bestBrain");
-}
-
-function activeTrain() {
-  isTrainMode = true;
-  localStorage.setItem("isTraining", true);
-}
-
-function deactiveTrain() {
-  isTrainMode = false;
-  localStorage.setItem("isTraining", false);
+function resetDatas() {
+  scoreboard.reset();
+  location.reload();
 }
 
 function generateCars(N) {
@@ -104,53 +101,47 @@ function generateDummy() {
       30,
       50,
       "DUMMY",
-      Math.random() + 0.7
+      Math.random() + 0.5
     ),
     new Car(
-      road.getLaneCenter((randomLane + 2) % road.laneCount),
+      road.getLaneCenter((randomLane + 4) % road.laneCount),
       bestCar.y - Math.random() * 200 - 800,
       30,
       50,
       "DUMMY",
       Math.random() + 0.7
     )
-    //new Car(
-    //  road.getLaneCenter((randomLane + 4) % road.laneCount),
-    //  bestCar.y - Math.random() * 200 - 800,
-    //  30,
-    //  50,
-    //  "DUMMY",
-    //  Math.random() + 0.7
-    //)
   );
 }
 
-function animate(time) {
-  let isAnyCarAlive = false;
-  aliveCarCount = 0;
+function getAliveCarCount() {
+  let aliveCarCount = 0;
   for (i = 0; i < cars.length; i++) {
-    if (cars[i].damaged == false) {
-      isAnyCarAlive = true;
-      aliveCarCount++;
-    }
+    if (!cars[i].damaged) aliveCarCount++;
   }
-  aliveCarText.innerText = aliveCarCount;
-  if (!isAnyCarAlive && !isReloaing) {
-    if (-bestCar.y > 3000) {
-      save();
+  return aliveCarCount;
+}
+
+function animate(time) {
+  const score = -bestCar.y;
+  const aliveCarCount = getAliveCarCount();
+  scoreboard.updateAliveCars(aliveCarCount);
+
+  //모든 ai차가 죽었을 경우,
+  if (aliveCarCount == 0) {
+    if (score > scoreboard.getLastFiveScoresAverage()) {
+      saveBrain();
     }
-    isReloaing = true;
+    scoreboard.updateLastFive(score);
+    scoreboard.addTryCount();
     location.reload();
   }
 
-  if (time / 1000 > genTrafficTime) {
+  if (time > genTrafficTime) {
+    traffic.push(...MakeTraffic(400, 100, 2));
     generateDummy();
     genTrafficTime += genTrafficTerm;
   }
-
-  //if (time / 1000 > trainingTime && isTrainMode) {
-  //  location.reload();
-  //}
 
   for (let i = 0; i < traffic.length; i++) {
     traffic[i].update(road.borders, []);
@@ -164,29 +155,26 @@ function animate(time) {
   networkCanvas.height = window.innerHeight;
 
   carCtx.save();
-  carCtx.translate(0, -bestCar.y + carCanvas.height * 0.7);
+  carCtx.translate(0, score + carCanvas.height * 0.7);
 
   road.draw(carCtx);
   for (let i = 0; i < traffic.length; i++) {
-    traffic[i].draw(carCtx, "red");
+    traffic[i].draw(carCtx, color.dummyCarColor);
   }
   carCtx.globalAlpha = 0.2;
   for (let i = 0; i < cars.length; i++) {
-    cars[i].draw(carCtx, "blue");
+    cars[i].draw(carCtx, color.aiCarColor);
   }
   carCtx.globalAlpha = 1;
-  bestCar.draw(carCtx, "blue", true);
+  bestCar.draw(carCtx, color.aiCarColor, true);
 
   carCtx.restore();
 
-  if (-bestCar.y > bestScore) {
-    bestScore = -bestCar.y;
-    localStorage.setItem("bestScore", -bestCar.y);
+  if (score > scoreboard.bestScore) {
+    scoreboard.updateBestScore(score);
   }
-  bestScoreText.innerText = Math.floor(bestScore);
 
-  currentScoreText.innerText =
-    Math.floor(-bestCar.y) > 0 ? Math.floor(-bestCar.y) : 0;
+  scoreboard.updateScore(score);
 
   networkCtx.lineDashOffset = -time / 60;
   Visualizer.drawNetwork(networkCtx, bestCar.brain);

@@ -23,14 +23,14 @@ class Car {
     this.controls = new Controls(controlType);
   }
 
-  update(roadBorders, traffic, bestCar) {
+  update(roadBorders, traffic, bestCar = null) {
     if (this.controlType != "DUMMY" && this.y - 230 > bestCar.y) {
       this.damaged = true;
     }
     if (!this.damaged) {
       this.#move();
       this.polygon = this.#createPolygon();
-      this.damaged = this.#assessDamage(roadBorders, traffic, bestCar);
+      this.damaged = this.#assessDamage(roadBorders, traffic);
       if (this.sensor) {
         this.sensor.update(roadBorders, traffic);
         const offsets = this.sensor.readings.map((s) =>
@@ -48,7 +48,7 @@ class Car {
     }
   }
 
-  #assessDamage(roadBorders, traffic, bestCar) {
+  #assessDamage(roadBorders, traffic) {
     for (let i = 0; i < roadBorders.length; i++) {
       if (polysIntersect(this.polygon, roadBorders[i])) {
         return true;

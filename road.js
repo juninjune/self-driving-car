@@ -19,6 +19,8 @@ class Road {
       [topLeft, bottomLeft],
       [topRight, bottomRight],
     ];
+
+    this.color = new Color();
   }
 
   getLaneCenter(landIndex) {
@@ -36,7 +38,7 @@ class Road {
 
   draw(ctx) {
     ctx.lineWidth = 5;
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = this.color.roadBorderColor;
 
     ctx.setLineDash([20, 20]);
     for (let i = 1; i <= this.laneCount - 1; i++) {

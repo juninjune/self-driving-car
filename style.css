@@ -1,3 +1,7 @@
+html {
+  font-family: " Helvetica ";
+}
+
 body {
   margin: 0;
   background-color: beige;
@@ -8,25 +12,35 @@ body {
 }
 
 #verticalButtons {
-  margin: 0px 5px;
+  margin: 5px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   text-align: center;
 }
-
-#best-score {
-  display: block;
-  margin-bottom: 10px;
+#verticalButtons button {
+  width: 30px;
+  height: 30px;
 }
 
-#current-score {
+.text-holder {
   display: block;
-  margin-bottom: 10px;
+  padding: 3px 7px;
+  border-radius: 5px;
+
+  font-size: 12px;
 }
 
-#alive-cars {
+.count-box {
+  background-color: coral;
+  width: 50px;
+  height: 15px;
+  margin: 3px 0;
+  margin-bottom: 7px;
+  border-radius: 5px;
   display: block;
-  margin-bottom: 10px;
+  font-size: 10px;
 }
 
 button {
