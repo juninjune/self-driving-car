@@ -4,6 +4,7 @@ class Car {
     this.y = y;
     this.width = width;
     this.height = height;
+    this.controlType = controlType;
 
     this.speed = 0;
     this.acceleration = 0.2;
@@ -11,19 +12,24 @@ class Car {
     this.friction = 0.05;
     this.angle = 0;
     this.rotateSpeed = 0.03;
+
     this.damaged = false;
-    this.controlType = controlType;
-
-    this.useBrain = controlType == "AI";
-
-    if (controlType != "DUMMY") {
+    this.controls = new Controls(controlType);
+    if (controlType == "AI") {
       this.sensor = new Sensor(this);
+      this.useBrain = true;
       this.brain = new NeuralNetwork([this.sensor.rayCount, 6, 4]);
     }
-    this.controls = new Controls(controlType);
   }
 
   update(roadBorders, traffic, bestCar = null) {
+    switch (this.controlType) {
+      case "DUMMY":
+        break;
+      case "AI":
+        break;
+    }
+
     if (this.controlType != "DUMMY" && this.y - 230 > bestCar.y) {
       this.damaged = true;
     }
