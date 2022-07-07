@@ -53,7 +53,7 @@ const traffic = [
   new Car(road.getLaneCenter(1), 250, 30, 50, "DUMMY", 2),
   new Car(road.getLaneCenter(2), 250, 30, 50, "DUMMY", 2),
 ];
-traffic.push(...MakeTraffic(400, 0, 3));
+traffic.push(...MakeTraffic(350, 150, 3));
 
 function MakeTraffic(distance, distanceTerm, count) {
   const newTraffic = [];
@@ -104,6 +104,9 @@ function getAliveCarCount() {
 
 function animate(time) {
   const score = -bestCar.y;
+  if (score > scoreboard.bestScore) {
+    scoreboard.updateBestScore(score);
+  }
   scoreboard.updateScore(score);
 
   const aliveCarCount = getAliveCarCount();
@@ -136,7 +139,7 @@ function animate(time) {
   networkCanvas.height = window.innerHeight;
 
   carCtx.save();
-  carCtx.translate(0, score + carCanvas.height * 0.7);
+  carCtx.translate(0, -bestCar.y + carCanvas.height * 0.7);
 
   road.draw(carCtx);
   for (let i = 0; i < traffic.length; i++) {
@@ -146,14 +149,12 @@ function animate(time) {
   for (let i = 0; i < cars.length; i++) {
     cars[i].draw(carCtx, color.aiCarColor);
   }
+  carCtx.globalAlpha = 0.5;
+  cars[0].draw(carCtx, "red", false);
   carCtx.globalAlpha = 1;
   bestCar.draw(carCtx, color.aiCarColor, true);
 
   carCtx.restore();
-
-  if (score > scoreboard.bestScore) {
-    scoreboard.updateBestScore(score);
-  }
 
   networkCtx.lineDashOffset = -time / 60;
   Visualizer.drawNetwork(networkCtx, bestCar.brain);
