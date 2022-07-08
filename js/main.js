@@ -55,7 +55,7 @@ for (let i = 0; i < laneCount; i++) {
 // traffic customize
 const trafficQuantity = 9;
 traffic.push(...makeTraffic(180, 150, 7));
-traffic.push(...makeTraffic(180, 450, 2));
+traffic.push(...makeTraffic(330, 450, 2));
 //#endregion
 
 //#region Methods
