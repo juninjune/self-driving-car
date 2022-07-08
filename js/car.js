@@ -1,5 +1,14 @@
 class Car {
-  constructor(x, y, width, height, controlType, maxSpeed = 3) {
+  constructor(
+    x,
+    y,
+    width,
+    height,
+    controlType,
+    maxSpeed = 3,
+    raySpread = Math.PI / 4,
+    rayCount = 7
+  ) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -16,7 +25,7 @@ class Car {
     this.damaged = false;
     this.controls = new Controls(controlType);
     if (controlType == "AI") {
-      this.sensor = new Sensor(this);
+      this.sensor = new Sensor(this, raySpread, rayCount);
       this.useBrain = true;
       this.brain = new NeuralNetwork([this.sensor.rayCount, 6, 4]);
     }

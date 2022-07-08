@@ -7,12 +7,20 @@ const mutateHigh = 0.4;
 // 일반 자손의 변화도 (0~1)
 const mutateLow = 0.1;
 
+// Car Settings
+const maxSpeed = 3;
+const rayCount = 5;
+const raySpread = Math.PI / 2;
+
+// Road Settings
+const laneCount = 3;
+
 //#region SETUP
 //이미지 캔버스 준비
 //carCanvas : 도로와 차
 //networkCanvas : 신경망
 const carCanvas = document.getElementById("carCanvas");
-carCanvas.width = 200;
+carCanvas.width = 20 + laneCount * 60;
 const networkCanvas = document.getElementById("networkCanvas");
 networkCanvas.width = 400;
 
@@ -27,7 +35,7 @@ const networkCtx = networkCanvas.getContext("2d");
 const scoreboard = new Scoreboard();
 
 //도로 초기화 (위치, 너비, 래인수)
-const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, 3);
+const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, laneCount);
 
 // ai 자동차 생성
 const cars = generateCars(carQuantity);
@@ -38,11 +46,11 @@ setBrain(cars);
 
 //초기 traffic 생성
 const trafficSpeed = 1.5;
-const traffic = [
-  new Car(road.getLaneCenter(0), 250, 30, 50, "START", 2.5),
-  new Car(road.getLaneCenter(1), 250, 30, 50, "START", 2.5),
-  new Car(road.getLaneCenter(2), 250, 30, 50, "START", 2.5),
-];
+const traffic = [];
+
+for (let i = 0; i < laneCount; i++) {
+  traffic.push(new Car(road.getLaneCenter(i), 250, 30, 50, "START", 2.5));
+}
 
 // traffic customize
 const trafficQuantity = 9;
@@ -55,7 +63,18 @@ traffic.push(...makeTraffic(180, 450, 2));
 function generateCars(N) {
   const cars = [];
   for (let i = 0; i <= N; i++) {
-    cars.push(new Car(road.getLaneCenter(1), 100, 30, 50, "AI"));
+    cars.push(
+      new Car(
+        road.getLaneCenter(Math.floor(laneCount / 2)),
+        100,
+        30,
+        50,
+        "AI",
+        maxSpeed,
+        raySpread,
+        rayCount
+      )
+    );
   }
   return cars;
 }
@@ -134,7 +153,7 @@ function animate(time) {
     scoreboard.updateBestScore(score);
   }
 
-  if (traffic.length - 3 < trafficQuantity) {
+  if (traffic.length - laneCount < trafficQuantity) {
     traffic.push(...makeTraffic(750, 0, 1));
   }
 
