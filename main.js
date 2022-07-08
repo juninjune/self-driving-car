@@ -1,13 +1,13 @@
 //AI Settings
 const carQuantity = 500;
+//변종 출현 빈도
 const mutateFrequency = 0.075;
+//변종의 변화도 (0~1)
 const mutateHigh = 0.4;
+// 일반 자손의 변화도 (0~1)
 const mutateLow = 0.1;
 
-//Traffic(obstacles) Settings
-const trafficSpeed = 1.5;
-const trafficQuantity = 5;
-
+//#region SETUP
 //이미지 캔버스 준비
 //carCanvas : 도로와 차
 //networkCanvas : 신경망
@@ -37,12 +37,28 @@ let bestCar = cars[0];
 setBrain(cars);
 
 //초기 traffic 생성
+const trafficSpeed = 1.5;
 const traffic = [
   new Car(road.getLaneCenter(0), 250, 30, 50, "START", 2.5),
   new Car(road.getLaneCenter(1), 250, 30, 50, "START", 2.5),
   new Car(road.getLaneCenter(2), 250, 30, 50, "START", 2.5),
 ];
-traffic.push(...makeTraffic(180, 150, 5));
+
+// traffic customize
+const trafficQuantity = 9;
+traffic.push(...makeTraffic(180, 150, 7));
+traffic.push(...makeTraffic(180, 450, 2));
+//#endregion
+
+//#region Methods
+
+function generateCars(N) {
+  const cars = [];
+  for (let i = 0; i <= N; i++) {
+    cars.push(new Car(road.getLaneCenter(1), 100, 30, 50, "AI"));
+  }
+  return cars;
+}
 
 function setBrain(cars) {
   if (localStorage.getItem("bestBrain")) {
@@ -69,7 +85,7 @@ function makeTraffic(distance, distanceTerm, count) {
         30,
         50,
         "DUMMY",
-        gaussianRand() - 0.5 + trafficSpeed
+        trafficSpeed
       )
     );
   }
@@ -85,14 +101,6 @@ function resetDatas() {
   location.reload();
 }
 
-function generateCars(N) {
-  const cars = [];
-  for (let i = 0; i <= N; i++) {
-    cars.push(new Car(road.getLaneCenter(1), 100, 30, 50, "AI"));
-  }
-  return cars;
-}
-
 function getAliveCarCount() {
   let aliveCarCount = 0;
   for (i = 0; i < cars.length; i++) {
@@ -100,6 +108,8 @@ function getAliveCarCount() {
   }
   return aliveCarCount;
 }
+
+//#endregion
 
 animate();
 
@@ -111,7 +121,6 @@ function animate(time) {
   const aliveCarCount = getAliveCarCount();
   scoreboard.updateAliveCars(aliveCarCount);
 
-  //모든 ai차가 죽었을 경우,
   if (aliveCarCount == 0) {
     if (score > scoreboard.getLastFiveScoresAverage()) {
       saveBrain();
@@ -121,8 +130,11 @@ function animate(time) {
     location.reload();
   }
 
+  if (score > scoreboard.bestScore) {
+    scoreboard.updateBestScore(score);
+  }
+
   if (traffic.length - 3 < trafficQuantity) {
-    // ㅇㅣㄱㅓ ㄲㅗㄱ ㄱㅗㅊㅕㅇㅑㅎㅐㅇㅛ. out START value
     traffic.push(...makeTraffic(750, 0, 1));
   }
 
@@ -134,6 +146,7 @@ function animate(time) {
   }
   bestCar = cars.find((c) => c.y == Math.min(...cars.map((c) => c.y)));
 
+  //#region Draw
   carCanvas.height = window.innerHeight;
   networkCanvas.height = window.innerHeight;
 
@@ -149,17 +162,15 @@ function animate(time) {
     cars[i].draw(carCtx, color.aiCarColor);
   }
   carCtx.globalAlpha = 0.5;
-  cars[0].draw(carCtx, "red", false);
+  cars[0].draw(carCtx, color.lastBestCarColor, false);
   carCtx.globalAlpha = 0.9;
   bestCar.draw(carCtx, color.aiCarColor, true);
 
   carCtx.restore();
 
-  if (score > scoreboard.bestScore) {
-    scoreboard.updateBestScore(score);
-  }
-
   networkCtx.lineDashOffset = -time / 60;
   Visualizer.drawNetwork(networkCtx, bestCar.brain);
+  //#endregion
+
   requestAnimationFrame(animate);
 }

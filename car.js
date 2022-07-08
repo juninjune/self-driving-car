@@ -50,7 +50,7 @@ class Car {
       }
     }
     if (this.controlType == "DUMMY") {
-      if (this.y - bestCar.y > 280) {
+      if (this.y - bestCar.y > 300) {
         for (let i = 0; i < container.length; i++) {
           if (container[i].y == this.y) {
             container.splice(i, 1);
